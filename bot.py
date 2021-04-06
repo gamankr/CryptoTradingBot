@@ -18,7 +18,7 @@ TRADE_QUANTITY = 0.0
 SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m" 
 
 closes = []
-in_position = False #If False sell it, if True buy it
+in_position = False #If False buy it, if True sell it
 client = Client(config.API_KEY, config.API_SECRET, tld='com')
 #client = Client(actual_config.API_KEY, actual_config.API_SECRET, tld='com')
 
@@ -57,12 +57,12 @@ def on_message(ws, message):
             print(f'Current RSI : {rsi[-1]}')
 
             if rsi[-1] < RSI_OVERSOLD:
-                if not in_position:
+                if not in_position: #Added to limit the no. of sell orders to 1. Check 'in_position' logic
                     print ("OVERSOLD...BUY!")
                     #Binance Logic
                     order_success =  order(SIDE_BUY, TRADE_QUANTITY, TRADE_SYMBOL)
                     if order_success:
-                        in_position = True
+                        in_position = True #Now the sell order can be activated
             
             if rsi[-1] > RSI_OVERBOUGHT:
                 if in_position:
@@ -70,7 +70,7 @@ def on_message(ws, message):
                     #Binance Logic
                     order_success =  order(SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL)
                     if order_success:
-                        in_position = False
+                        in_position = False  # Now the buy order can be activated
 
 
 ws = websocket.WebSocketApp(SOCKET, on_open=on_open, on_close=on_close, on_message=on_message)
